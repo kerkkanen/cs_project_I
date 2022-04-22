@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Hearts</title>
+</head>
+
+
+<body>
+
+
+
+    <h1>My Hearts</h1>
+    {% if user.is_superuser %}
+    <a href="/delete">Go to delete site</a>
+    <p>
+        {% endif %}
+
+
+        <b>User:</b> {{user.username}}
+       <br> Change password<br>
+        <form action='change/' method="POST">
+            {% csrf_token %}
+            <input name="new" />
+            <input type="submit" value="Change" />
+        </form>
+        <p>
+        <form action='logout/' method="POST">
+            {% csrf_token %}
+            <input type="submit" value="Logout" />
+        </form>
+
+        <p>
+            <b>♥ received:</b> {{account.hearts}}
+            <br>
+
+
+            <h2>Send hearts</h2>
+
+            <form action='find/' method="POST">
+                <!-- {% csrf_token %} -->
+                
+                <span>Find users:</span><br />
+                <input type="text" name="searched" />
+
+                <input type="submit" value="Search" />
+
+            </form>
+
+            <p></p>
+            {% if person is not none %}
+
+            <form action='transfer/' method="POST">
+                <!-- {% csrf_token %} -->
+
+                <li>{{ person }}<input type="checkbox" name="chosen" value="{{ person }}"></li>
+
+                <p>
+
+                    <span>Amount:</span><br />
+                    <input type="number" name="amount" /><br />
+
+                    <p>
+                        <span>Message:</span><br />
+                        <textarea type="text" name="message" required></textarea>
+
+                        <input type="submit" value="Send" />
+
+            </form>
+
+            {% endif %}
+
+
+
+
+            <h2>Messages</h2>
+
+            {% for message in messages %}
+
+            <b><i>From {{message.sender.username}} to {{message.receiver.username}}</i></b></br>
+
+              
+            {{message.content|safe}}
+            <p>
+
+             {% endfor %}
+
+
+
+
+
+
+
+</body>
+
+
+</body>
+
+</html>
