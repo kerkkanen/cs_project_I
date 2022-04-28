@@ -10,7 +10,8 @@ from .models import Message
 @login_required
 def index(request):
     user = request.user
-    if user.username == 'admin':
+    user = User.objects.get(username=user.username)
+    if user.is_superuser == 1:
         return render(request, 'hearts/index.html')
     account = Account.objects.get(owner=user.id)
     messages = Message.objects.all()
@@ -29,9 +30,17 @@ def logout(request):
 
 def find(request):
     if request.method == "POST":
-        searched = request.POST.get('searched')        
+        searched = request.POST.get('searched')
         query = "SELECT * FROM auth_user WHERE username = '%s';" % searched
-        user = User.objects.raw(query)        
+        user = User.objects.raw(query)
+        # ****SQL-injection fixes****
+        # fix 1:
+        #users = User.objects.filter(username=searched)
+        # or
+        # fix 2:
+        #query = "SELECT * FROM auth_user WHERE username=:searched"
+        #users = User.objects.raw(query, {"searched": searched})
+
         if len(user) > 0:
             name = str(user[0])
             request.session['person'] = name
@@ -63,14 +72,24 @@ def send(sender, receiver, amount):
     return
 
 
-def delete(request):    
+def delete(request):
     return HttpResponse("Anyone could delete anything here!")
+    #****Broken Access Control fix****
+    #current_user = request.user
+    #user = User.objects.get(username=current_user.username)
+    #if user.is_superuser == 1:
+    #    return HttpResponse("Now only admin can delete!")
+    #return redirect('index')
+
 
 def change(request):
     if request.method == "POST":
-        user = request.user
-        user = User.objects.get(username=user.username)
+        current_user = request.user
+        user = User.objects.get(username=current_user.username)
         password = request.POST.get('new')
+        #****Broken Authentication fix****
+        #if len(password) < 8 and not any(not c.isalpha() for c in password:
+        #    return redirect('index') + some error message
         user.set_password(password)
         user.save()
     return redirect('index')
